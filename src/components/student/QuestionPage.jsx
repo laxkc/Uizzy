@@ -1,72 +1,90 @@
-import React, { useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "antd";
 import { QuizContext } from "../../context/QuizProvider";
-import { TrophyOutlined, UserOutlined } from "@ant-design/icons";
-import { motion } from "framer-motion";
+import { CheckCircleOutlined, ClockCircleOutlined } from "@ant-design/icons";
 
-const FinalResultsPage = () => {
-  const { score } = useContext(QuizContext);
+const QuestionPage = () => {
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(15);
+  const navigate = useNavigate();
+  const {
+    currentQuestionIndex,
+    setCurrentQuestionIndex,
+    score,
+    setScore,
+    questions,
+    isGameStarted,
+  } = useContext(QuizContext);
 
-  // Fake data for the leaderboard
-  const leaderboardData = [
-    { name: "Player1", points: 100 },
-    { name: "Player2", points: 90 },
-    { name: "Player3", points: 80 },
-    { name: "Player4", points: 70 },
-    { name: "Player5", points: 60 },
-  ];
+  const currentQuestion = questions[currentQuestionIndex];
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      handleAnswerSubmit(); // Automatically submit answer when time is up
+    }
+  }, [timeLeft]);
+
+  useEffect(() => {
+    if (!isGameStarted) {
+      navigate("/student/waiting-lobby");
+    }
+  }, [isGameStarted, navigate]);
+
+  const handleAnswerSubmit = () => {
+    if (selectedAnswer === currentQuestion.correctAnswer) {
+      setScore(score + 10);
+    }
+
+    // Navigate to the scoreboard after the answer is submitted
+    navigate("/student/scoreboard");
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-yellow-400 to-yellow-600 text-white p-6">
-      <motion.h1 
-        className="text-4xl font-bold mb-6"
-        initial={{ opacity: 0, y: -50 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.5 }}
-      >
-        Final Results
-      </motion.h1>
-      <motion.p 
-        className="text-2xl mb-4"
-        initial={{ opacity: 0, y: -50 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        Your final score is: <span className="font-extrabold">{score}</span>
-      </motion.p>
-      
-      <h2 className="text-3xl font-bold mt-4">Top Winners:</h2>
-      
-      <div className="flex flex-wrap justify-center mt-4">
-        {leaderboardData.map((player, index) => (
-          <motion.div 
-            key={index} 
-            className="bg-white text-black rounded-lg shadow-lg m-2 p-4 flex items-center transition-transform transform hover:scale-105"
-            initial={{ scale: 0 }} 
-            animate={{ scale: 1 }} 
-            transition={{ duration: 0.5, delay: index * 0.1 }} // Staggered animation
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-400 to-blue-600 p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center text-white">
+        {currentQuestion.question}
+      </h1>
+      <div className="grid grid-cols-2 gap-4 w-full max-w-xl">
+        {currentQuestion.options.map((option, index) => (
+          <Button
+            key={index}
+            onClick={() => setSelectedAnswer(option)}
+            className={`text-lg font-medium p-4 border rounded-lg transition-all duration-300 ${
+              selectedAnswer === option
+                ? "bg-white text-blue-600"
+                : "bg-white text-gray-800 hover:bg-gray-200"
+            }`}
+            size="large"
+            style={{
+              borderColor: selectedAnswer === option ? "blue" : "lightgray",
+              boxShadow:
+                selectedAnswer === option
+                  ? "0 4px 15px rgba(0, 0, 0, 0.2)"
+                  : "none",
+            }}
           >
-            <span className="text-3xl font-bold mr-2">{index + 1}</span>
-            <UserOutlined className="mr-2 text-yellow-400" />
-            <div>
-              <h3 className="font-semibold">{player.name}</h3>
-              <p className={`font-bold ${player.points > score ? 'text-green-500' : 'text-red-500'}`}>
-                {player.points} points
-              </p>
-            </div>
-          </motion.div>
+            {option}
+          </Button>
         ))}
       </div>
-
-      <motion.div 
-        className="mt-6"
-        initial={{ scale: 0 }} 
-        animate={{ scale: 1 }} 
-        transition={{ duration: 0.5 }}
+      <Button
+        type="primary"
+        onClick={handleAnswerSubmit}
+        disabled={!selectedAnswer}
+        className="bg-gray-800 text-white hover:bg-gray-700 mt-6 w-full max-w-md"
       >
-        <TrophyOutlined className="text-6xl text-yellow-200" />
-      </motion.div>
+        Submit Answer <CheckCircleOutlined />
+      </Button>
+      <div className="flex items-center justify-center mt-6 text-white">
+        <ClockCircleOutlined style={{ fontSize: "24px", marginRight: "8px" }} />
+        <p className="text-2xl">Time left: {timeLeft} seconds</p>
+      </div>
     </div>
   );
 };
 
-export default FinalResultsPage;
+export default QuestionPage;
