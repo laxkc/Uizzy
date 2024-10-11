@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { Avatar, Button, Dropdown, Menu } from "antd";
+import { Avatar, Dropdown, Menu } from "antd";
 import { UserOutlined, DownOutlined, MenuOutlined } from "@ant-design/icons";
+
+import LogoutButton from "../auth/LogoutButton";
 
 const DashboardHeader = () => {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -22,13 +24,7 @@ const DashboardHeader = () => {
         <a href="/settings">Settings</a>
       </Menu.Item>
       <Menu.Item key="logout">
-        <Button
-          type="link"
-          danger
-          onClick={() => console.log("Logout Clicked")}
-        >
-          Logout
-        </Button>
+        <LogoutButton />
       </Menu.Item>
     </Menu>
   );
@@ -67,13 +63,7 @@ const DashboardHeader = () => {
                 <a href="/settings">Settings</a>
               </Menu.Item>
               <Menu.Item key="logout">
-                <Button
-                  type="link"
-                  danger
-                  onClick={() => console.log("Logout Clicked")}
-                >
-                  Logout
-                </Button>
+                <LogoutButton /> {/* LogoutButton integrated here as well */}
               </Menu.Item>
             </Menu>
           </div>

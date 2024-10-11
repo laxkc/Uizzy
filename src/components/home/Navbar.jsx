@@ -1,15 +1,22 @@
 import React from "react";
 import { Link } from "react-scroll";
-import { motion } from "framer-motion";
 import { useState } from "react";
-
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-    const toggleMobileMenu = () => {
-      setIsMobileMenuOpen(!isMobileMenuOpen);
-    };
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { session } = useAuth();
+  const navigate = useNavigate();
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleDashboardClick = () => {
+    navigate("/teacher"); // Redirect to the dashboard
+  };
+
   return (
     <>
       <nav className="bg-white shadow-md fixed w-full z-50">
@@ -21,19 +28,40 @@ function Navbar() {
             Uizzy
           </h1>
           <ul className="hidden md:flex space-x-8 items-center">
-            {["Home", "Features", "Testimonials", "Login / Sign Up"].map(
-              (item) => (
-                <li key={item}>
-                  <Link
-                    to={item.toLowerCase()}
-                    smooth={true}
-                    duration={500}
-                    className="cursor-pointer hover:text-indigo-600 transition-colors duration-300"
-                  >
-                    {item}
-                  </Link>
-                </li>
-              )
+            {["Home", "Features", "Testimonials"].map((item) => (
+              <li key={item}>
+                <Link
+                  to={item.toLowerCase()}
+                  smooth={true}
+                  duration={500}
+                  className="cursor-pointer hover:text-indigo-600 transition-colors duration-300"
+                >
+                  {item}
+                </Link>
+              </li>
+            ))}
+
+            {/* Conditionally render Login/Sign Up or Dashboard */}
+            {!session ? (
+              <li>
+                <Link
+                  to="login / sign up"
+                  smooth={true}
+                  duration={500}
+                  className="cursor-pointer hover:text-indigo-600 transition-colors duration-300"
+                >
+                  Login / Sign Up
+                </Link>
+              </li>
+            ) : (
+              <li>
+                <button
+                  onClick={handleDashboardClick}
+                  className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition-colors duration-300"
+                >
+                  Dashboard
+                </button>
+              </li>
             )}
           </ul>
           <button
@@ -60,20 +88,41 @@ function Navbar() {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white shadow-md py-4 px-6">
             <ul className="space-y-4">
-              {["Home", "Features", "Testimonials", "Login / Signup"].map(
-                (item) => (
-                  <li key={item}>
-                    <Link
-                      to={item.toLowerCase()}
-                      smooth={true}
-                      duration={500}
-                      className="cursor-pointer hover:text-indigo-600 transition-colors duration-300"
-                      onClick={toggleMobileMenu}
-                    >
-                      {item}
-                    </Link>
-                  </li>
-                )
+              {["Home", "Features", "Testimonials"].map((item) => (
+                <li key={item}>
+                  <Link
+                    to={item.toLowerCase()}
+                    smooth={true}
+                    duration={500}
+                    className="cursor-pointer hover:text-indigo-600 transition-colors duration-300"
+                    onClick={toggleMobileMenu}
+                  >
+                    {item}
+                  </Link>
+                </li>
+              ))}
+              {/* Conditionally render Login/Sign Up or Dashboard in mobile menu */}
+              {!session ? (
+                <li>
+                  <Link
+                    to="login / sign up"
+                    smooth={true}
+                    duration={500}
+                    className="cursor-pointer hover:text-indigo-600 transition-colors duration-300"
+                    onClick={toggleMobileMenu}
+                  >
+                    Login / Sign Up
+                  </Link>
+                </li>
+              ) : (
+                <li>
+                  <button
+                    onClick={handleDashboardClick}
+                    className="bg-indigo-600 text-white w-full py-2 rounded hover:bg-indigo-700 transition-colors duration-300"
+                  >
+                    Dashboard
+                  </button>
+                </li>
               )}
             </ul>
           </div>

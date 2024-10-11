@@ -5,8 +5,11 @@ import Features from "../components/home/Features";
 import Testimonial from "../components/home/Testimonial";
 import FrontSection from "../components/home/FrontSection";
 import Navbar from "../components/home/Navbar";
+import { useAuth } from "../context/AuthContext";
 
 export default function HomePage() {
+  const { session } = useAuth();
+
   return (
     <div className="font-sans bg-gray-100 text-gray-900 scroll-smooth">
       {/* Navbar */}
@@ -16,7 +19,7 @@ export default function HomePage() {
       <FrontSection />
 
       {/* Login / Sign Up Section */}
-      <LoginSignupSection />
+      {!session && <LoginSignupSection />}
 
       {/* Features Overview Section */}
       <Features />
