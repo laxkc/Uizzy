@@ -2,17 +2,6 @@
 
 Uizzy is an interactive quiz application inspired by Kahoot!, built using React.js, Tailwind CSS, Ant Design, React Icons, Supabase, and PostgreSQL. The platform allows users to create, share, and participate in quizzes in a fun and engaging manner.
 
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Installation](#installation)
-- [Usage](#usage)
-- [API Reference](#api-reference)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
-
 ## Features
 
 - **User Authentication**: Secure sign-up and login using Supabase.
