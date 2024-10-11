@@ -37,4 +37,4 @@ Uizzy is an interactive quiz application inspired by Kahoot!, built using React.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/uizzy.git
+   git clone https://github.com/laxnax/Uizzy.git 
