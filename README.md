@@ -22,6 +22,13 @@ Uizzy is an interactive quiz application inspired by Kahoot!, built using React.
   - [Supabase](https://supabase.io/)
   - [PostgreSQL](https://www.postgresql.org/)
 
+
+    
+
+https://github.com/user-attachments/assets/2c9b34c1-83e2-4949-8b0b-1c7925e22c60
+
+
+
 ## Installation
 
 1. Clone the repository:
