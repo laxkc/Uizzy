@@ -291,7 +291,7 @@ const PlayerQuestionPage = () => {
               <Text className="text-lg mb-2">
                 {currentQuestion.question_text}
               </Text>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              {/* <div className="grid grid-cols-2 gap-4 mb-4">
                 {options.map((option) => (
                   <Button
                     key={option.id}
@@ -302,7 +302,19 @@ const PlayerQuestionPage = () => {
                     {option.option_text}
                   </Button>
                 ))}
+              </div> */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                {options.map((option) => (
+                  <button
+                    key={option.id}
+                    className="flex justify-center items-center rounded-lg p-4 h-16 bg-gray-200 text-black transition duration-300 ease-in-out focus:outline-none text-base sm:text-lg" // Responsive text size
+                    onClick={() => handleOptionSelect(option.id)}
+                  >
+                    {option.option_text}
+                  </button>
+                ))}
               </div>
+
               <Text className="text-lg mb-2">
                 Time left: {countdown} seconds
               </Text>
