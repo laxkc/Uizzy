@@ -204,10 +204,10 @@ const JoinGamePage = () => {
             Game PIN
           </label>
           <input
-            type="text"
+            type="number"
             id="pin"
             value={pin}
-            onChange={(e) => setPin(e.target.value)}
+            onChange={(e) => setPin(e.target.value.replace(/\D/, ""))} // This ensures only numbers are entered
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Enter Game PIN"
           />

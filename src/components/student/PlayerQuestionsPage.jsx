@@ -174,7 +174,7 @@ const PlayerQuestionPage = () => {
 
   // Handle option selection
   const handleOptionSelect = async (optionId) => {
-    if (isSubmitted) return; // Prevent further submissions
+    if (isSubmitted || !optionId) return; // Prevent further submissions or if no option selected
 
     setSelectedOptionId(optionId);
     setShowResult(true);
@@ -262,14 +262,14 @@ const PlayerQuestionPage = () => {
     setIsSubmitted(true); // Mark as submitted
     localStorage.setItem(`submitted_${playerId}`, "true"); // Save submission state
 
-    // Show the correct answer if time runs out
+    // Show notification that the player ran out of time
     notification.info({
       message: "Time's up!",
       description: "You ran out of time.",
     });
 
-    // Set the selected option id to be the correct answer id
-    setSelectedOptionId(correctAnswerId); // Set the selected option to the correct answer
+    // No answer selected; no score update or selection
+    setSelectedOptionId(null); // Clear the selected option since none was chosen
   };
 
   return (
@@ -319,10 +319,13 @@ const PlayerQuestionPage = () => {
               className="mt-4 bg-white shadow-lg rounded-lg p-8 w-full max-w-4xl mx-4"
             >
               <Title level={3}>{showResult ? "Result" : "Game Over"}</Title>
+             
               <Text className="text-lg mb-2">
                 {isSubmitted
                   ? selectedOptionId === correctAnswerId
                     ? "You answered correctly!"
+                    : selectedOptionId === null
+                    ? "You didn't answer in time."
                     : `The correct answer was: ${
                         options.find((option) => option.id === correctAnswerId)
                           ?.option_text
