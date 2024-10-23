@@ -296,9 +296,7 @@ const PlayerQuestionPage = () => {
                   <Button
                     key={option.id}
                     type="default"
-                    className={`flex justify-center items-center rounded-lg p-4 transition duration-300 ease-in-out text-lg h-16 ${
-                      selectedOptionId === option.id ? "bg-blue-300" : ""
-                    }`}
+                    className="flex justify-center items-center rounded-lg p-4 transition duration-300 ease-in-out text-lg h-16"
                     onClick={() => handleOptionSelect(option.id)}
                   >
                     {option.option_text}
@@ -319,7 +317,7 @@ const PlayerQuestionPage = () => {
               className="mt-4 bg-white shadow-lg rounded-lg p-8 w-full max-w-4xl mx-4"
             >
               <Title level={3}>{showResult ? "Result" : "Game Over"}</Title>
-             
+
               <Text className="text-lg mb-2">
                 {isSubmitted
                   ? selectedOptionId === correctAnswerId
