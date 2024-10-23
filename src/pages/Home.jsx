@@ -8,7 +8,7 @@ import Navbar from "../components/home/Navbar";
 import { useAuth } from "../context/AuthContext";
 
 export default function HomePage() {
-  const { session } = useAuth();
+  const { user } = useAuth();
 
   return (
     <div className="font-sans bg-gray-100 text-gray-900 scroll-smooth">
@@ -19,7 +19,7 @@ export default function HomePage() {
       <FrontSection />
 
       {/* Login / Sign Up Section */}
-      {!session && <LoginSignupSection />}
+      {!user && <LoginSignupSection />}
 
       {/* Features Overview Section */}
       <Features />

@@ -3,8 +3,6 @@ import { Menu } from "antd";
 import {
   DashboardOutlined,
   FileTextOutlined,
-  BarChartOutlined,
-  PlayCircleOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
@@ -31,18 +29,6 @@ const Sidebar = () => {
       icon: <FileTextOutlined />,
       label: "Manage Quiz",
       path: "/teacher/quizzes",
-    },
-    {
-      key: "hostGame",
-      icon: <PlayCircleOutlined />,
-      label: "Host Game",
-      path: "/teacher/host-game",
-    },
-    {
-      key: "analytics",
-      icon: <BarChartOutlined />,
-      label: "Analytics",
-      path: "/teacher/analytics",
     },
   ];
 
@@ -97,6 +83,7 @@ const Sidebar = () => {
             key={item.key}
             icon={item.icon}
             className={`transition-colors duration-300 hover:bg-blue-100`}
+            title={collapsed ? "" : item.label} // Set title based on collapse state
           >
             <span
               className={`transition-opacity duration-300 ${

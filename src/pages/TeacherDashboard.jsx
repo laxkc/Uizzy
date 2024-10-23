@@ -24,9 +24,9 @@ const TeacherDashboard = () => {
             <Analytics />
           </div>
 
-          <div className="mt-6">
+          {/* <div className="mt-6">
             <Leaderboard />
-          </div>
+          </div> */}
 
           <div className="mt-6">
             <QuickActions />

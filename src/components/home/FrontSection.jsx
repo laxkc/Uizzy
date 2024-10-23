@@ -4,12 +4,18 @@ import { Button } from "antd";
 import { FaPlayCircle } from "react-icons/fa";
 import heroImage from "../../assets/images/hero-image.jpeg";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function FrontSection() {
+  const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const showModal = () => {
     setIsModalVisible(true);
+  };
+  // join   a game button
+  const handleJoinGame = () => {
+    navigate("/student");
   };
   return (
     <>
@@ -92,9 +98,9 @@ function FrontSection() {
                 <Button
                   type="default"
                   className="bg-green-500 text-white hover:bg-green-600 transition-transform duration-300 transform px-6 py-3 rounded-lg"
-                  onClick={showModal}
+                  onClick={handleJoinGame}
                 >
-                  Start a Live Quiz Session
+                  Join a Game
                 </Button>
               </motion.div>
             </motion.div>

@@ -1,12 +1,12 @@
 import React from "react";
 import { Link } from "react-scroll";
 import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext"; // Import the useAuth hook
 import { useNavigate } from "react-router-dom";
 
 function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { session } = useAuth();
+  const { user } = useAuth(); // Get the user from AuthContext
   const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
@@ -42,7 +42,7 @@ function Navbar() {
             ))}
 
             {/* Conditionally render Login/Sign Up or Dashboard */}
-            {!session ? (
+            {!user ? (
               <li>
                 <Link
                   to="login / sign up"
@@ -102,7 +102,7 @@ function Navbar() {
                 </li>
               ))}
               {/* Conditionally render Login/Sign Up or Dashboard in mobile menu */}
-              {!session ? (
+              {!user ? (
                 <li>
                   <Link
                     to="login / sign up"

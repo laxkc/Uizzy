@@ -1,11 +1,16 @@
 import React, { useState } from "react";
-import { Avatar, Dropdown, Menu } from "antd";
+import { Avatar, Dropdown, Menu, Button } from "antd";
 import { UserOutlined, DownOutlined, MenuOutlined } from "@ant-design/icons";
-
+import { useAuth } from "../../context/AuthContext";
 import LogoutButton from "../auth/LogoutButton";
+import { PlusOutlined } from "@ant-design/icons";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const DashboardHeader = () => {
   const [menuVisible, setMenuVisible] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation(); // Hook to get the current location
 
   const handleMenuToggle = () => {
     setMenuVisible(!menuVisible);
@@ -15,6 +20,12 @@ const DashboardHeader = () => {
     setMenuVisible(false); // Close the menu when an item is clicked
   };
 
+  // Button to create a new quiz
+  const handleCreateQuiz = () => {
+    navigate("/teacher/quizzes");
+  };
+
+  // Menu dropdown for profile, settings, and logout
   const menu = (
     <Menu>
       <Menu.Item key="profile" onClick={handleMenuClick}>
@@ -35,6 +46,17 @@ const DashboardHeader = () => {
         <h1 className="text-2xl font-bold text-gray-800">Teacher Dashboard</h1>
       </div>
       <div className="hidden md:flex items-center space-x-4">
+        {/* Conditionally render the Create button if not on /teacher/quizzes */}
+        {location.pathname !== "/teacher/quizzes" && (
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            size="large"
+            onClick={handleCreateQuiz}
+          >
+            Create
+          </Button>
+        )}
         <Dropdown overlay={menu} trigger={["click"]}>
           <div className="flex items-center cursor-pointer text-gray-800">
             <Avatar
@@ -42,7 +64,9 @@ const DashboardHeader = () => {
               icon={<UserOutlined />}
               className="bg-indigo-600"
             />
-            <span className="ml-2">User Name</span>
+            <span className="ml-2">
+              {user ? user.name : "User"} {/* Display user name if available */}
+            </span>
             <DownOutlined className="text-gray-800 ml-1" />
           </div>
         </Dropdown>
@@ -63,7 +87,7 @@ const DashboardHeader = () => {
                 <a href="/settings">Settings</a>
               </Menu.Item>
               <Menu.Item key="logout">
-                <LogoutButton /> {/* LogoutButton integrated here as well */}
+                <LogoutButton />
               </Menu.Item>
             </Menu>
           </div>

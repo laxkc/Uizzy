@@ -2,7 +2,6 @@ import React from "react";
 import { Button } from "antd";
 import {
   PlusOutlined,
-  BarChartOutlined,
   PlayCircleOutlined,
 } from "@ant-design/icons";
 
@@ -15,13 +14,6 @@ const QuickActions = ({ setActiveComponent }) => (
       onClick={() => setActiveComponent("createQuiz")}
     >
       Create Quiz
-    </Button>
-    <Button
-      icon={<BarChartOutlined />}
-      size="large"
-      onClick={() => setActiveComponent("analytics")}
-    >
-      View Analytics
     </Button>
     <Button
       type="primary"

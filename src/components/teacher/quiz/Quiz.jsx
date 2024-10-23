@@ -1,13 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Spin, Tooltip, Card, Pagination, Tag, Input, Select, DatePicker } from "antd";
+import {
+  Table,
+  Button,
+  Spin,
+  Tooltip,
+  Card,
+  Pagination,
+  Tag,
+  Input,
+  Select,
+  DatePicker,
+} from "antd";
 import { FaPlus, FaEdit, FaTrash, FaPlay } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
+import { supabase } from "../../../services/supabaseClient";
+import { useAuth } from "../../../context/AuthContext";
 
 const { Search } = Input;
 const { Option } = Select;
 
 const Quiz = () => {
+  const { user } = useAuth();
   const [quizzes, setQuizzes] = useState([]);
   const [filteredQuizzes, setFilteredQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,30 +34,29 @@ const Quiz = () => {
     createdAt: null,
   });
 
-  // Sample data for math quizzes
-  const fetchQuizzes = () => {
-    setTimeout(() => {
-      const mockQuizzes = [
-        { id: 1, title: "Algebra Basics", createdAt: "2024-09-01", participants: 20, status: "Hosted" },
-        { id: 2, title: "Geometry Essentials", createdAt: "2024-09-05", participants: 15, status: "Drafted" },
-        { id: 3, title: "Calculus Introduction", createdAt: "2024-09-10", participants: 10, status: "Hosted" },
-        { id: 4, title: "Statistics Overview", createdAt: "2024-09-15", participants: 5, status: "Hosted" },
-        { id: 5, title: "Trigonometry Tricks", createdAt: "2024-09-20", participants: 8, status: "Drafted" },
-        { id: 6, title: "Probability Puzzles", createdAt: "2024-09-25", participants: 12, status: "Hosted" },
-        { id: 7, title: "Number Theory", createdAt: "2024-09-30", participants: 3, status: "Drafted" },
-        { id: 8, title: "Math Olympiad Preparation", createdAt: "2024-09-28", participants: 18, status: "Hosted" },
-        { id: 9, title: "Graph Theory Basics", createdAt: "2024-09-29", participants: 25, status: "Drafted" },
-        { id: 10, title: "Discrete Mathematics", createdAt: "2024-09-15", participants: 14, status: "Hosted" },
-      ];
-      setQuizzes(mockQuizzes);
-      setFilteredQuizzes(mockQuizzes);
-      setLoading(false);
-    }, 1000);
+  // Ensure teacherId is correctly set
+  const teacherId = user ? user.id : null; // Assuming user object contains the teacher ID
+
+  const fetchQuizzes = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("quizzes")
+      .select("id, title, created_at, status") // Removed participants
+      .eq("teacher_id", teacherId) // Use teacherId here
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching quizzes:", error);
+    } else {
+      setQuizzes(data);
+      setFilteredQuizzes(data);
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchQuizzes();
-  }, []);
+  }, [teacherId]); // Added teacherId to the dependency array
 
   useEffect(() => {
     applyFilters();
@@ -53,14 +66,20 @@ const Quiz = () => {
     navigate(`/teacher/quizzes/edit/${quiz.id}`);
   };
 
-  const handleDelete = (quizId) => {
-    const updatedQuizzes = quizzes.filter((quiz) => quiz.id !== quizId);
-    setQuizzes(updatedQuizzes);
-    setFilteredQuizzes(updatedQuizzes);
+  const handleDelete = async (quizId) => {
+    const { error } = await supabase.from("quizzes").delete().eq("id", quizId);
+
+    if (error) {
+      console.error("Error deleting quiz:", error);
+    } else {
+      const updatedQuizzes = quizzes.filter((quiz) => quiz.id !== quizId);
+      setQuizzes(updatedQuizzes);
+      setFilteredQuizzes(updatedQuizzes);
+    }
   };
 
   const handleHostGame = (quizId) => {
-    navigate(`/teacher/host-game/${quizId}`);
+    navigate(`/host-game/${quizId}`);
   };
 
   const handlePageChange = (page) => {
@@ -76,7 +95,7 @@ const Quiz = () => {
 
   const applyFilters = () => {
     let filtered = [...quizzes];
-    
+
     // Filter by search term
     if (filters.search) {
       filtered = filtered.filter((quiz) =>
@@ -93,7 +112,7 @@ const Quiz = () => {
     if (filters.createdAt) {
       filtered = filtered.filter(
         (quiz) =>
-          moment(quiz.createdAt).format("YYYY-MM-DD") ===
+          moment(quiz.created_at).format("YYYY-MM-DD") ===
           filters.createdAt.format("YYYY-MM-DD")
       );
     }
@@ -110,20 +129,16 @@ const Quiz = () => {
     },
     {
       title: "Created At",
-      dataIndex: "createdAt",
-      key: "createdAt",
-    },
-    {
-      title: "Participants",
-      dataIndex: "participants",
-      key: "participants",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (text) => moment(text).format("YYYY-MM-DD"),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => (
-        <Tag color={status === "Hosted" ? "green" : "orange"}>{status}</Tag>
+        <Tag color={status === "published" ? "green" : "orange"}>{status}</Tag>
       ),
     },
     {
@@ -149,9 +164,7 @@ const Quiz = () => {
             <Button
               type="default"
               icon={<FaPlay />}
-              onClick={
-                () => navigate(`/teacher/host-game/quiz`)
-              }
+              onClick={() => handleHostGame(record.id)}
             />
           </Tooltip>
         </div>
@@ -160,19 +173,22 @@ const Quiz = () => {
   ];
 
   const startIndex = (currentPage - 1) * pageSize;
-  const currentQuizzes = filteredQuizzes.slice(startIndex, startIndex + pageSize);
+  const currentQuizzes = filteredQuizzes.slice(
+    startIndex,
+    startIndex + pageSize
+  );
 
   return (
     <div className="p-6 bg-white min-h-screen">
       <Card className="mb-6 bg-white">
-        <h2 className="text-2xl font-bold mb-4">All Math Quizzes</h2>
+        <h2 className="text-2xl font-bold mb-4">All Quizzes</h2>
         <Button
           type="primary"
           icon={<FaPlus />}
           className="mb-4"
-          onClick={() => navigate("/teacher/quizzes/create")}
+          onClick={() => navigate(`/teacher/quizzes/${teacherId}/create`)} // Use teacherId here
         >
-          Create New Quiz
+          Create Quiz
         </Button>
         <div className="flex space-x-4 mb-4">
           <Search
@@ -213,7 +229,9 @@ const Quiz = () => {
           />
           <div className="flex justify-between items-center mt-4">
             <span>
-              Showing {startIndex + 1} to {Math.min(startIndex + pageSize, filteredQuizzes.length)} of {filteredQuizzes.length} quizzes
+              Showing {startIndex + 1} to{" "}
+              {Math.min(startIndex + pageSize, filteredQuizzes.length)} of{" "}
+              {filteredQuizzes.length} quizzes
             </span>
             <Pagination
               current={currentPage}

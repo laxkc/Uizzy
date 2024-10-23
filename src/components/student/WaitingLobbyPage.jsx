@@ -1,123 +1,210 @@
-import React, { useEffect, useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { QuizContext } from "../../context/QuizProvider";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "../../services/supabaseClient";
+import { Card, Spin } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import { motion } from "framer-motion";
-import mascotImage from "../../assets/student/mascot-waiting.png";
+import Confetti from "react-confetti"; // For confetti effect
 
 const WaitingLobbyPage = () => {
+  const { playerId, hostId } = useParams();
+  const [playerDetails, setPlayerDetails] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [encouragingMessage, setEncouragingMessage] = useState("");
   const navigate = useNavigate();
-  const {
-    setIsGameStarted,
-    studentNickname,
-    avatar,
-  } = useContext(QuizContext);
-  const [countdown, setCountdown] = useState(10);
-  const [quote, setQuote] = useState("");
 
-  const motivationalQuotes = [
-    "Get ready to show what you know!",
-    "The game is about to start, stay sharp!",
-    "Prepare yourself, it's quiz time!",
-    "Let's do this! Your knowledge is your superpower!",
-    "The challenge begins soon, are you ready?",
+  // Encouraging messages array
+  const messages = [
+    "Get ready for some fun!",
+    "You're going to do great!",
+    "The wait is almost over!",
+    "Stay focused and enjoy!",
+    "Knowledge is power!",
   ];
 
-  useEffect(() => {
-    const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
-    setQuote(motivationalQuotes[randomIndex]);
-  }, []);
+  const fetchPlayerDetails = async () => {
+    try {
+      if (!playerId) {
+        throw new Error("Player ID is missing");
+      }
+
+      const { data, error } = await supabase
+        .from("players")
+        .select("nickname, host_id, pin, status")
+        .eq("id", playerId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching player data:", error);
+        setError("Error fetching player details.");
+        return;
+      }
+
+      setPlayerDetails(data);
+    } catch (error) {
+      console.error("Error fetching data:", error.message);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to update player status to inactive
+  const updatePlayerStatus = async (status) => {
+    try {
+      const { error } = await supabase
+        .from("players")
+        .update({ status }) // Update player status
+        .eq("id", playerId);
+
+      if (error) {
+        console.error("Error updating player status:", error);
+      } else {
+        console.log(`Player status updated to: ${status}`); // Log success
+      }
+    } catch (error) {
+      console.error("Error updating player status:", error.message);
+    }
+  };
 
   useEffect(() => {
-    if (countdown <= 0) {
-      setIsGameStarted(true);
-      navigate("/student/question");
-    } else {
-      const timer = setTimeout(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [countdown, navigate, setIsGameStarted]);
+    fetchPlayerDetails();
+
+    // Randomly set an encouraging message
+    setEncouragingMessage(
+      messages[Math.floor(Math.random() * messages.length)]
+    );
+
+    const handleBeforeUnload = (event) => {
+      const confirmationMessage =
+        "Are you sure you want to leave? Your status will be updated to inactive.";
+      event.returnValue = confirmationMessage; // Show confirmation dialog
+      return confirmationMessage; // Display confirmation dialog (for some browsers)
+    };
+
+    const handleUnload = () => {
+      // Update player status to inactive when the page unloads
+      updatePlayerStatus("inactive");
+      console.log("Player status updated to inactive."); // Log message for debugging
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
+
+    // Subscribe to real-time changes for the player's status
+    const playerSubscription = supabase
+      .channel("players")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "players" },
+        (payload) => {
+          if (payload.new.id === playerId) {
+            setPlayerDetails((prevDetails) => ({
+              ...prevDetails,
+              status: payload.new.status, // Update only the status
+            }));
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to real-time changes for the host's status
+
+    const hostSubscription = () => {
+      const channel = supabase
+        .channel("hosts")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "hosts" },
+          (payload) => {
+            if (payload.eventType === "UPDATE" && payload.new.id === hostId) {
+              if (payload.new.status === "ongoing") {
+                navigate(`/student/player-questions/${hostId}/${playerId}`);
+              }
+            }
+          }
+        )
+        .subscribe();
+
+      return channel;
+    };
+
+    const gameHostSubscription = hostSubscription();
+
+    return () => {
+      // Clean up the event listeners and subscriptions
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
+      supabase.removeChannel(playerSubscription);
+      supabase.removeChannel(gameHostSubscription);
+    };
+  }, [playerId, navigate, hostId]);
 
   return (
-    <motion.div
-      className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-800 to-gray-900 text-white p-8"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-    >
-      <img src={mascotImage} alt="Mascot" className="w-32 h-32 mb-6" />
-      <motion.h1
-        className="text-4xl font-bold mb-2 text-center tracking-wider"
-        initial={{ scale: 0.8, y: -30 }}
-        animate={{ scale: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
-        Waiting for the Game to Start...
-      </motion.h1>
-
-      <motion.p
-        className="text-6xl font-extrabold my-4"
-        initial={{ scale: 0.8 }}
-        animate={{ scale: 1 }}
-        transition={{ repeat: Infinity, repeatType: "mirror", duration: 1 }}
-      >
-        {countdown}
-      </motion.p>
-
-      <motion.p
-        className="text-lg font-light italic text-center px-6 mb-8"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 1 }}
-      >
-        {quote}
-      </motion.p>
-
-      {/* User Avatar and Nickname Section */}
-      <div className="flex items-center space-x-4 mb-8">
-        <motion.div
-          className="text-4xl"
-          initial={{ scale: 0.8, rotate: 0 }}
-          animate={{ scale: 1, rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-500 relative overflow-hidden">
+      <Confetti /> {/* Confetti effect */}
+      <div className="max-w-md w-full">
+        <Card
+          title="Waiting Lobby"
+          className="shadow-lg"
+          headStyle={{ backgroundColor: "#4a4e69", color: "#ffffff" }}
+          bodyStyle={{ backgroundColor: "#ffffff" }}
         >
-          {avatar} {/* Emoji Avatar */}
-        </motion.div>
-        <motion.h2
-          className="text-2xl font-semibold"
-          initial={{ y: -10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          {studentNickname}
-        </motion.h2>
+          {loading ? (
+            <div className="flex justify-center">
+              <Spin size="large" />
+            </div>
+          ) : (
+            <>
+              {error && <p className="text-red-500 mb-4">{error}</p>}
+              {playerDetails ? (
+                <div className="text-center">
+                  <UserOutlined className="text-4xl text-blue-600 mb-2" />
+                  <h2 className="text-xl font-semibold">
+                    {playerDetails.nickname}
+                  </h2>
+                  <p className="mt-2">
+                    Game PIN:{" "}
+                    <span className="font-medium">{playerDetails.pin}</span>
+                  </p>
+                  <p>
+                    Status:
+                    <span
+                      className={`font-medium ${
+                        playerDetails.status === "active"
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {playerDetails.status}
+                    </span>
+                  </p>
+                  <p className="mt-4 text-lg">{encouragingMessage}</p>
+                  <motion.button
+                    className="mt-6 bg-blue-600 text-white py-2 px-4 rounded"
+                    initial={{ opacity: 0.5 }}
+                    animate={{ opacity: 1 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                    }}
+                  >
+                    Loading...
+                  </motion.button>
+                </div>
+              ) : (
+                <p>Loading player details...</p>
+              )}
+            </>
+          )}
+        </Card>
       </div>
-
-      <motion.div
-        className="absolute bottom-10 right-10 w-1/4 h-1/4 bg-blue-300 rounded-full opacity-40 blur-2xl"
-        initial={{ scale: 0.5 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-      />
-      <motion.div
-        className="absolute top-10 left-10 w-1/4 h-1/4 bg-yellow-300 rounded-full opacity-40 blur-2xl"
-        initial={{ scale: 0.5 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-      />
-
-      <motion.div
-        className="absolute bottom-16 flex space-x-4 text-lg font-light opacity-80"
-        initial={{ rotate: 0 }}
-        animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-      >
-        <p>Loading the game...</p>
-        <p>🎮</p>
-      </motion.div>
-    </motion.div>
+    </div>
   );
 };
 
 export default WaitingLobbyPage;
+
+// console.error("Host status:", payload.new.status);
