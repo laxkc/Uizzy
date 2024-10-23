@@ -4,6 +4,7 @@ import { FaPlay, FaTimes } from "react-icons/fa";
 import Avatar from "react-avatar";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../../services/supabaseClient";
+import { QRCodeSVG } from "qrcode.react";
 
 const Lobby = () => {
   const { hostId } = useParams();
@@ -239,6 +240,19 @@ const Lobby = () => {
           <h2 className="text-lg font-bold mb-2 text-purple-700">Game PIN</h2>
           <div className="text-xl font-bold bg-purple-700 text-white px-3 py-2 rounded-full max-w-full">
             {pin || "Loading..."}
+          </div>
+        </Card>
+
+        {/* QR Code */}
+        <Card className="p-4 rounded-lg shadow-md bg-white text-center col-span-1 md:col-span-3 h-full">
+          <div className="flex justify-center items-center h-full">
+            <div className="w-full max-w-xs aspect-square">
+              <QRCodeSVG
+                value={`${window.location.origin}/student?pin=${pin}`}
+                className="w-full h-full"
+                level="H"
+              />
+            </div>
           </div>
         </Card>
       </div>
