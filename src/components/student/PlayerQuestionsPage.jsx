@@ -297,7 +297,7 @@ const PlayerQuestionPage = () => {
                     key={option.id}
                     type="default"
                     className={`flex justify-center items-center rounded-lg p-4 transition duration-300 ease-in-out text-lg h-16 ${
-                      selectedOptionId === option.id ? "bg-blue-300" : ""
+                      selectedOptionId === option.id ? "bg-blue-300" : "hover:bg-blue-200"
                     }`}
                     onClick={() => handleOptionSelect(option.id)}
                   >
