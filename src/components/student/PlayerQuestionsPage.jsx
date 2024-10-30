@@ -307,7 +307,7 @@ const PlayerQuestionPage = () => {
                 {options.map((option) => (
                   <button
                     key={option.id}
-                    className="flex justify-center items-center rounded-lg p-4 h-16 bg-gray-200 text-black transition duration-300 ease-in-out focus:outline-none text-base sm:text-lg" // Responsive text size
+                    className="flex justify-center items-center rounded-lg p-4 h-16 bg-gray-200 text-black text-center break-words transition duration-300 ease-in-out focus:outline-none text-base sm:text-lg w-full"
                     onClick={() => handleOptionSelect(option.id)}
                   >
                     {option.option_text}

@@ -64,7 +64,9 @@ const QuizzesOverview = () => {
           { event: "INSERT", schema: "public", table: "hosts" },
           (payload) => {
             const newHost = payload.new;
-            message.success(`Game hosted successfully! Join using PIN: ${newHost.pin}`);
+            message.success(
+              `Game hosted successfully! Join using PIN: ${newHost.pin}`
+            );
             navigate(`/host-game/${newHost.id}`);
           }
         )
@@ -98,15 +100,42 @@ const QuizzesOverview = () => {
     return pin;
   };
 
-  const hostURL =  window.location.origin + "/student/"; // Get the base URL for hosting a game
+  const hostURL = window.location.origin + "/student/"; // Get the base URL for hosting a game
   // Handle hosting a game
+  // const handleHostGame = async (quizId) => {
+  //   try {
+  //     const pin = await generateUniquePin(); // Generate a unique PIN
+  //     const qrCodeUrl = `${hostURL}`; // Generate the QR code URL
+
+  //     // Insert the host entry into the database
+  //     const { error } = await supabase
+  //       .from("hosts")
+  //       .insert([
+  //         {
+  //           quiz_id: quizId,
+  //           pin: pin,
+  //           status: "lobby",
+  //           qr_code: qrCodeUrl,
+  //         },
+  //       ]);
+
+  //     // Check for errors
+  //     if (error) {
+  //       console.error("Error inserting host: ", error.message); // Log the error message
+  //       message.error("Error hosting game: " + error.message); // Show error to the user
+  //     }
+  //   } catch (error) {
+  //     message.error("Error hosting game: " + error.message);
+  //   }
+  // };
+
   const handleHostGame = async (quizId) => {
     try {
-      const pin = await generateUniquePin(); // Generate a unique PIN
-      const qrCodeUrl = `${hostURL}`; // Generate the QR code URL
+      const pin = await generateUniquePin();
+      const qrCodeUrl = `${hostURL}`;
 
       // Insert the host entry into the database
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("hosts")
         .insert([
           {
@@ -115,12 +144,17 @@ const QuizzesOverview = () => {
             status: "lobby",
             qr_code: qrCodeUrl,
           },
-        ]);
+        ])
+        .select("*")
+        .single(); // Ensures you get back the inserted row
 
       // Check for errors
       if (error) {
-        console.error("Error inserting host: ", error.message); // Log the error message
-        message.error("Error hosting game: " + error.message); // Show error to the user
+        console.error("Error inserting host: ", error.message);
+        message.error("Error hosting game: " + error.message);
+      } else {
+        // Navigate to the lobby page with the host ID
+        navigate(`/host-game/${data.id}`);
       }
     } catch (error) {
       message.error("Error hosting game: " + error.message);
@@ -150,8 +184,8 @@ const QuizzesOverview = () => {
         <span
           className={`inline-block px-2 py-1 text-sm font-semibold rounded-full ${
             status === "published"
-              ? "bg-blue-100 text-blue-800"  // Blue background and text for Published
-              : "bg-gray-100 text-gray-800"   // Gray background and text for Draft
+              ? "bg-blue-100 text-blue-800" // Blue background and text for Published
+              : "bg-gray-100 text-gray-800" // Gray background and text for Draft
           }`}
         >
           {status}
