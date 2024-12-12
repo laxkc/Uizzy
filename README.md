@@ -92,7 +92,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Demo
 
-You can check out the live demo of Uizzy at [Uizzy Demo](#).
+You can check out the demo of Uizzy at [Live](https://uizzy.vercel.app).
 
 ## Screenshots
 ![image](https://github.com/user-attachments/assets/4f8b1ea8-0a30-4010-a04d-b6e40c7117a9)
