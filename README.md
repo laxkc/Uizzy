@@ -94,3 +94,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 You can check out the live demo of Uizzy at [Uizzy Demo](#).
 
+## Screenshots
+![image](https://github.com/user-attachments/assets/4f8b1ea8-0a30-4010-a04d-b6e40c7117a9)
+
+![image](https://github.com/user-attachments/assets/bfb29b65-63df-4c86-8068-50e256ca851b)
+
+![image](https://github.com/user-attachments/assets/20d7a55c-2c94-4d78-923f-cb2364a89d18)
+
+![image](https://github.com/user-attachments/assets/612781de-5c1f-4f26-9ab1-66d00bf43e8f)
+
+
+
+
+
+
+
+
+
